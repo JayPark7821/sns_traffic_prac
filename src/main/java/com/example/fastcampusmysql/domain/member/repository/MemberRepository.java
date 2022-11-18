@@ -23,6 +23,13 @@ public class MemberRepository {
 
 	private final NamedParameterJdbcTemplate jdbcTemplate;
 	private static final String TABLE = "member";
+	private static final RowMapper<Member> rowMapper = (ResultSet resultSet, int rowNum) -> Member.builder()
+		.id(resultSet.getLong("id"))
+		.email(resultSet.getString("email"))
+		.nickname(resultSet.getString("nickname"))
+		.createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
+		.birthday(resultSet.getObject("birthday", LocalDate.class))
+		.build();
 
 	public Optional<Member> findById(Long id) {
 		/*
@@ -34,13 +41,7 @@ public class MemberRepository {
 		String sql = String.format("SELECT * FROM %s WHERE id = :id", TABLE);
 		MapSqlParameterSource param = new MapSqlParameterSource()
 			.addValue("id", id);
-		RowMapper<Member> rowMapper = (ResultSet resultSet, int rowNum) -> Member.builder()
-			.id(resultSet.getLong("id"))
-			.email(resultSet.getString("email"))
-			.nickname(resultSet.getString("nickname"))
-			.createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
-			.birthday(resultSet.getObject("birthday", LocalDate.class))
-			.build();
+
 
 		Member member = jdbcTemplate.queryForObject(sql, param, rowMapper);
 		return Optional.ofNullable(member);
@@ -76,6 +77,11 @@ public class MemberRepository {
 
 	private Member update(Member member) {
 		// TODO : implement
+		String sql = String.format(
+			"UPDATE %s SET EMAIL = :email,  EMAIL = :email,  NICKNAME = :nickname,  BIRTHDAY = :birthday WHERE ID = :id ",
+			TABLE);
+		SqlParameterSource params = new BeanPropertySqlParameterSource(member);
+		jdbcTemplate.update(sql, params);
 		return member;
 	}
 }
