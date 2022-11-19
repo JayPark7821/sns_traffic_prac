@@ -1,13 +1,18 @@
 package com.example.fastcampusmysql.domain.follow.repository;
 
-import org.springframework.jdbc.core.JdbcTemplate;
+import java.sql.ResultSet;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import com.example.fastcampusmysql.domain.follow.entity.Follow;
-import com.example.fastcampusmysql.domain.member.dto.MemberDto;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,8 +20,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class FollowRepository {
 
-	private static final String TABEL = "follow";
-	private final JdbcTemplate jdbcTemplate;
+	private static final String TABLE = "follow";
+	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+
+	private static final RowMapper<Follow> rowMapper = (ResultSet resultSet, int rowNum) -> Follow.builder()
+		.id(resultSet.getLong("id"))
+		.fromMemberId(resultSet.getLong("fromMemberId"))
+		.toMemberId(resultSet.getLong("toMemberId"))
+		.createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
+		.build();
+
+	public List<Follow> findAllByFromMemberId(Long fromMemberId) {
+		String sql = String.format("select * from %s where fromMemberId = :fromMemberId", TABLE);
+		MapSqlParameterSource param = new MapSqlParameterSource().addValue("fromMemberId", fromMemberId);
+		return namedParameterJdbcTemplate.query(sql, param, rowMapper);
+
+	}
 
 	public Follow save(Follow follow) {
 		if (follow.getId() == null) {
@@ -26,8 +45,8 @@ public class FollowRepository {
 		throw new UnsupportedOperationException("follow는 갱신을 지원하지 않습니다.");
 	}
 	private Follow insert(Follow follow) {
-		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-			.withTableName(TABEL)
+		SimpleJdbcInsert jdbcInsert = new SimpleJdbcInsert(namedParameterJdbcTemplate.getJdbcTemplate() )
+			.withTableName(TABLE)
 			.usingGeneratedKeyColumns("id");
 
 		SqlParameterSource params = new BeanPropertySqlParameterSource(follow);
@@ -40,11 +59,4 @@ public class FollowRepository {
 			.build();
 	}
 
-	public void create(MemberDto fromMemberId, MemberDto toMemberId) {
-		/**
-		 * from, to 회원 정보를 받아서
-		 * 저장
-		 * from to validate
-		 */
-	}
 }

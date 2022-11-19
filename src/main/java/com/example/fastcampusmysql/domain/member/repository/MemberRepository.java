@@ -3,6 +3,7 @@ package com.example.fastcampusmysql.domain.member.repository;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.jdbc.core.RowMapper;
@@ -47,6 +48,16 @@ public class MemberRepository {
 		return Optional.ofNullable(member);
 
 	}
+
+	public List<Member> findAllByIdIn(List<Long> ids) {
+		if (ids.isEmpty()) {
+			return List.of();
+		}
+		String sql = String.format("select from %s where id in (:ids)", TABLE);
+		MapSqlParameterSource params = new MapSqlParameterSource().addValue("ids", ids);
+		return jdbcTemplate.query(sql, params, rowMapper);
+	}
+
 	public Member save(Member member) {
 		/*
 		member id를 보고 갱신 또는 삽입을 정함
