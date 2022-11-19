@@ -18,7 +18,7 @@ public class FollowWriteService {
 	private final FollowRepository followRepository;
 
 	public void create(MemberDto fromMemberId, MemberDto toMemberId) {
-		Assert.isTrue(fromMemberId.id().equals(toMemberId.id()), "From, to 회원이 동일합니다.");
+		Assert.isTrue(!fromMemberId.id().equals(toMemberId.id()), "From, to 회원이 동일합니다.");
 
 		Follow follow = Follow.builder()
 			.fromMemberId(fromMemberId.id())
