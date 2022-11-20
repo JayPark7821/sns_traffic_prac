@@ -1,4 +1,4 @@
-package com.example.fastcampusmysql.domain.follow.application.controller;
+package com.example.fastcampusmysql.application.controller;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.fastcampusmysql.domain.follow.application.usercase.CreateFollowMemberUsecase;
-import com.example.fastcampusmysql.domain.follow.application.usercase.GetFollowingMemberUsecase;
+import com.example.fastcampusmysql.application.usercase.CreateFollowMemberUsecase;
+import com.example.fastcampusmysql.application.usercase.GetFollowingMemberUsecase;
 import com.example.fastcampusmysql.domain.member.dto.MemberDto;
 
 import lombok.RequiredArgsConstructor;

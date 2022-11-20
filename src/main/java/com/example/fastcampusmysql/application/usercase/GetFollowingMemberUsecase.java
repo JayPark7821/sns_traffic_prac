@@ -1,4 +1,4 @@
-package com.example.fastcampusmysql.domain.follow.application.usercase;
+package com.example.fastcampusmysql.application.usercase;
 
 import java.util.List;
 import java.util.stream.Collectors;
