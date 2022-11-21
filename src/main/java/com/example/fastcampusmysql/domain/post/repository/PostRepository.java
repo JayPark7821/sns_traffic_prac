@@ -1,11 +1,19 @@
 package com.example.fastcampusmysql.domain.post.repository;
 
+import java.sql.ResultSet;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
+import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
+import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.entity.Post;
 
 import lombok.RequiredArgsConstructor;
@@ -15,6 +23,22 @@ import lombok.RequiredArgsConstructor;
 public class PostRepository {
 	private static final String TABLE = "Post";
 	private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+	private static final RowMapper<DailyPostCount> DAILY_POST_COUNT_MAPPER = (ResultSet resultSet, int rouNum)
+		-> new DailyPostCount(resultSet.getLong("memberId"),
+		resultSet.getObject("createdDate", LocalDate.class),
+		resultSet.getLong("count"));
+
+
+	public List<DailyPostCount> groupByCreatedDate(DailyPostCountRequest request) {
+		String sql = String.format("""
+				SELECT createdDate, memberId, count(id)
+				FROM %s
+				WHERE memberId = :memberId and createdDate between :firstDate and : lastDate
+				GROUP BY memberId, createdDate
+			""", TABLE);
+		BeanPropertySqlParameterSource params = new BeanPropertySqlParameterSource(request);
+		return namedParameterJdbcTemplate.query(sql, params, DAILY_POST_COUNT_MAPPER);
+	}
 
 	public Post save(Post post) {
 
