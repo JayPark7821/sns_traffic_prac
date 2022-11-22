@@ -18,6 +18,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
+import com.example.fastcampusmysql.domain.PageHelper;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.entity.Post;
@@ -72,12 +73,13 @@ public class PostRepository {
 			.addValue("offset", pageable.getOffset());
 
 		String sql = String.format("""
-				SELECT *
+				SELECT * 
 				FROM %s
 				WHERE memberId = :memberId
+				ORDER BY %s
 				LIMIT :size
 				OFFSET :offset
-			""", TABLE);
+			""", TABLE, PageHelper.orderBy(pageable.getSort()));
 		List<Post> posts = namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
 		return new PageImpl(posts, pageable, getCount(memberId));
 
