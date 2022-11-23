@@ -5,10 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
@@ -18,7 +16,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import com.example.fastcampusmysql.domain.PageHelper;
+import com.example.fastcampusmysql.domain.util.PageHelper;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.entity.Post;
@@ -83,6 +81,34 @@ public class PostRepository {
 		List<Post> posts = namedParameterJdbcTemplate.query(sql, params, ROW_MAPPER);
 		return new PageImpl(posts, pageable, getCount(memberId));
 
+	}
+
+	public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, Long size) {
+		String sql = String.format("""
+			select *
+			from %s
+			WHERE memberId = :memberId
+			ORDER BY id desc
+			LIMIT :size
+			""", TABLE);
+		MapSqlParameterSource param = new MapSqlParameterSource()
+			.addValue("memberId", memberId)
+			.addValue("size", size);
+		return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
+	}
+	public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, Long size) {
+		String sql = String.format("""
+			select *
+			from %s
+			WHERE memberId = :memberId and id < :id
+			ORDER BY id desc
+			LIMIT :size
+			""", TABLE);
+		MapSqlParameterSource param = new MapSqlParameterSource()
+			.addValue("memberId", memberId)
+			.addValue("size", size)
+			.addValue("id", id);
+		return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
 	}
 
 	private Long getCount(Long memberId) {
