@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.fastcampusmysql.application.usercase.CreatePostUsecase;
+import com.example.fastcampusmysql.application.usercase.GetTimelinePostsUseCase;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCount;
 import com.example.fastcampusmysql.domain.post.dto.DailyPostCountRequest;
 import com.example.fastcampusmysql.domain.post.dto.PostCommand;
@@ -29,10 +31,13 @@ import lombok.RequiredArgsConstructor;
 public class PostController {
 	private final PostWriteService postWriteService;
 	private final PostReadService postReadService;
+	private final GetTimelinePostsUseCase getTimelinePostsUseCase;
+	private final CreatePostUsecase createPostUsecase;
+
 
 	@PostMapping("")
 	public Long create(PostCommand command) {
-		return postWriteService.create(command);
+		return createPostUsecase.execute(command);
 	}
 
 	@GetMapping("/daily-post-counts")
@@ -56,5 +61,13 @@ public class PostController {
 		CursorRequest cursorRequest
 	) {
 		return postReadService.getPosts(memberId, cursorRequest);
+	}
+
+	@GetMapping("/members/{memberId}/timeline")
+	public PageCursor<Post> getTimeline(
+		@PathVariable Long memberId,
+		CursorRequest cursorRequest
+	) {
+		return getTimelinePostsUseCase.execute(memberId, cursorRequest);
 	}
 }

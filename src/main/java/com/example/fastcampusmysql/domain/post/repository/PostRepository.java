@@ -96,6 +96,23 @@ public class PostRepository {
 			.addValue("size", size);
 		return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
 	}
+
+	public List<Post> findAllByInMemberIdsAndOrderByIdDesc(List<Long> memberIds, Long size) {
+		if (memberIds.isEmpty()) {
+			return List.of();
+		}
+		String sql = String.format("""
+			select *
+			from %s
+			WHERE memberId in (:memberIds)
+			ORDER BY id desc
+			LIMIT :size
+			""", TABLE);
+		MapSqlParameterSource param = new MapSqlParameterSource()
+			.addValue("memberIds", memberIds)
+			.addValue("size", size);
+		return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
+	}
 	public List<Post> findAllByLessThanIdAndMemberIdAndOrderByIdDesc(Long id, Long memberId, Long size) {
 		String sql = String.format("""
 			select *
@@ -111,6 +128,24 @@ public class PostRepository {
 		return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
 	}
 
+	public List<Post> findAllByLessThanIdAndInMemberIdsAndOrderByIdDesc(Long id, List<Long> memberIds, Long size) {
+		if (memberIds.isEmpty()) {
+			return List.of();
+		}
+
+		String sql = String.format("""
+			select *
+			from %s
+			WHERE memberId in (:memberIds) and id < :id
+			ORDER BY id desc
+			LIMIT :size
+			""", TABLE);
+		MapSqlParameterSource param = new MapSqlParameterSource()
+			.addValue("memberIds", memberIds)
+			.addValue("size", size)
+			.addValue("id", id);
+		return namedParameterJdbcTemplate.query(sql, param, ROW_MAPPER);
+	}
 	private Long getCount(Long memberId) {
 		String sql = String.format("""
 			select count(id)
@@ -128,6 +163,24 @@ public class PostRepository {
 			return insert(post);
 		}
 		throw new UnsupportedOperationException("Post는 갱신을 지원하지 않습니다.");
+	}
+
+	public List<Post> findAllByIdIn(List<Long> postIds) {
+		if (postIds.isEmpty()) {
+			return List.of();
+		}
+
+		var params = new MapSqlParameterSource()
+			.addValue("postIds", postIds);
+
+		String query = String.format("""
+                SELECT *
+                FROM %s
+                WHERE id in (:postIds)
+                """, TABLE);
+
+		return namedParameterJdbcTemplate.query(query, params, ROW_MAPPER);
+
 	}
 
 	private Post insert(Post post) {
