@@ -70,4 +70,9 @@ public class PostController {
 	) {
 		return getTimelinePostsUseCase.execute(memberId, cursorRequest);
 	}
+
+	@PostMapping("/{postId}/likes")
+	public void likePost(@PathVariable Long postId) {
+		postWriteService.likePost(postId);
+	}
 }

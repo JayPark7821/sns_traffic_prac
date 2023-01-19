@@ -22,4 +22,10 @@ public class PostWriteService {
 			.build();
 		return postRepository.save(post).getId();
 	}
+
+	public void likePost(Long postId) {
+		Post post = postRepository.findById(postId).orElseThrow();
+		post.increamentLikeCount();
+		postRepository.save(post);
+	}
 }

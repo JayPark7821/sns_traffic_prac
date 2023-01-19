@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -39,6 +40,7 @@ public class PostRepository {
 		.contents(resultSet.getString("contents"))
 		.createdDate(resultSet.getObject("createdDate", LocalDate.class))
 		.createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
+		.likeCount(resultSet.getLong("likeCount"))
 		.build();
 
 	public void bulkInsert(List<Post> posts) {
@@ -83,7 +85,17 @@ public class PostRepository {
 
 	}
 
-	public List<Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, Long size) {
+	public Optional<Post> findById(Long id) {
+		String sql = String.format("""
+				SELECT * 
+				FROM %s
+				WHERE id = :postId
+			""", TABLE);
+		MapSqlParameterSource params = new MapSqlParameterSource().addValue("postId", id);
+		return Optional.of(namedParameterJdbcTemplate.queryForObject(sql, params, ROW_MAPPER));
+	}
+
+	public List<com.example.fastcampusmysql.domain.post.entity.Post> findAllByMemberIdAndOrderByIdDesc(Long memberId, Long size) {
 		String sql = String.format("""
 			select *
 			from %s
@@ -162,7 +174,7 @@ public class PostRepository {
 		if (post.getId() == null) {
 			return insert(post);
 		}
-		throw new UnsupportedOperationException("Post는 갱신을 지원하지 않습니다.");
+		return update(post);
 	}
 
 	public List<Post> findAllByIdIn(List<Long> postIds) {
@@ -197,6 +209,24 @@ public class PostRepository {
 			.createdAt(post.getCreatedAt())
 			.createdDate(post.getCreatedDate())
 			.build();
+	}
+
+	private Post update(Post post) {
+		// TODO : implement
+		String sql = String.format(
+			"""
+			UPDATE %s SET 
+			 MEMBERID = :memberId,
+			 CONTENTS = :contents,
+			 CREATEDDATE = :createdDate,
+			 LIKECOUNT = :likeCount,
+			 CREATEDAT = :createdAt
+			WHERE ID = :id 
+			""",
+			TABLE);
+		SqlParameterSource params = new BeanPropertySqlParameterSource(post);
+		namedParameterJdbcTemplate.update(sql, params);
+		return post;
 	}
 
 }
