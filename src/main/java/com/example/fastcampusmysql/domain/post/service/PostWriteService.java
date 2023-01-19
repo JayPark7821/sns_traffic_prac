@@ -2,6 +2,7 @@ package com.example.fastcampusmysql.domain.post.service;
 
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.fastcampusmysql.domain.post.dto.PostCommand;
 import com.example.fastcampusmysql.domain.post.entity.Post;
@@ -23,8 +24,9 @@ public class PostWriteService {
 		return postRepository.save(post).getId();
 	}
 
+	@Transactional
 	public void likePost(Long postId) {
-		Post post = postRepository.findById(postId).orElseThrow();
+		Post post = postRepository.findById(postId, true).orElseThrow();
 		post.increamentLikeCount();
 		postRepository.save(post);
 	}

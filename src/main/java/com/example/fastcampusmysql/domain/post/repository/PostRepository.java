@@ -85,12 +85,15 @@ public class PostRepository {
 
 	}
 
-	public Optional<Post> findById(Long id) {
+	public Optional<Post> findById(Long id, Boolean requireLock) {
 		String sql = String.format("""
 				SELECT * 
 				FROM %s
 				WHERE id = :postId
 			""", TABLE);
+		if(requireLock)
+			sql += " FOR UPDATE";
+		
 		MapSqlParameterSource params = new MapSqlParameterSource().addValue("postId", id);
 		return Optional.of(namedParameterJdbcTemplate.queryForObject(sql, params, ROW_MAPPER));
 	}
