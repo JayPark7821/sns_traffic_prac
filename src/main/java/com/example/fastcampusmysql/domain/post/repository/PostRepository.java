@@ -41,6 +41,7 @@ public class PostRepository {
 		.createdDate(resultSet.getObject("createdDate", LocalDate.class))
 		.createdAt(resultSet.getObject("createdAt", LocalDateTime.class))
 		.likeCount(resultSet.getLong("likeCount"))
+		.version(resultSet.getLong("version"))
 		.build();
 
 	public void bulkInsert(List<Post> posts) {
@@ -224,11 +225,16 @@ public class PostRepository {
 			 CREATEDDATE = :createdDate,
 			 LIKECOUNT = :likeCount,
 			 CREATEDAT = :createdAt
+			 VERSION = :version + 1
 			WHERE ID = :id 
+			 AND VERSION = :version
 			""",
 			TABLE);
 		SqlParameterSource params = new BeanPropertySqlParameterSource(post);
-		namedParameterJdbcTemplate.update(sql, params);
+		int updateCount = namedParameterJdbcTemplate.update(sql, params);
+		if (updateCount == 0) {
+			throw new RuntimeException("갱신실패");
+		}
 		return post;
 	}
 
