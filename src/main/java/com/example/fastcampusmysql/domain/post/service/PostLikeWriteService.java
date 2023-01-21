@@ -20,7 +20,7 @@ public class PostLikeWriteService {
 			.postId(post.getId())
 			.memberId(memberDto.id())
 			.build();
-		return postLikeRepository.save(postLike).getId();
+		return postLikeRepository.save(postLike).getPostId();
 	}
 
 }

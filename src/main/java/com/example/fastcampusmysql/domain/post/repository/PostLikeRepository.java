@@ -54,4 +54,16 @@ public class PostLikeRepository {
 			.build();
 	}
 
+	public Long getCount(Long postId) {
+		String sql = String.format("""
+			select count(id)
+			from %s
+			WHERE postId = :postId
+			""", TABLE);
+		MapSqlParameterSource param = new MapSqlParameterSource()
+			.addValue("postId", postId);
+		return namedParameterJdbcTemplate.queryForObject(sql, param, Long.class);
+	}
+
+
 }
